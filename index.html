@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Page</title>
+    <!-- Add favicon -->
+    <link rel="icon" type="image/png" href="https://cdn.bio.link/uploads/profile_pictures/2025-04-23/KIyjnGulLHDzGoQ4C7CxfjLZ15tSoAAO.png">
+
+    <!-- Include Quicksand Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: url('https://wallpapercave.com/wp/wp2381382.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
+        iframe {
+            border: none;
+            width: 200px;
+            flex: 1;
+        }
+        /* Countdown bubble styling */
+        #countdown {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #f0f8ff;
+            border: 2px solid #3498db;
+            border-radius: 15px;
+            padding: 10px 20px;
+            font-family: 'Quicksand', Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            text-align: center;
+        }
+        /* "Things to do" text box styling */
+        #things-to-do {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 200px;
+            height: 200px;
+            background-color: #ffffff;
+            border: 2px solid #3498db;
+            border-radius: 10px;
+            padding: 10px;
+            font-family: 'Quicksand', Arial, sans-serif;
+            font-size: 14px;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            resize: none;
+            z-index: 1000;
+        }
+        /* Countdown events styling */
+        #event-countdowns {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 250px;
+            background-color: #f8f9fa;
+            border: 2px solid #e67e22;
+            border-radius: 15px;
+            padding: 16px 18px;
+            font-family: 'Quicksand', Arial, sans-serif;
+            font-size: 15px;
+            color: #333;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.08);
+            z-index: 1000;
+        }
+        #event-countdowns h3 {
+            margin: 0 0 10px 0;
+            font-size: 16px;
+            color: #e67e22;
+        }
+        #event-countdowns ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 0;
+        }
+        #event-countdowns li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Live Date/Time -->
+    <div id="countdown">Loading...</div>
+    <!-- Editable "Things to do" Text Box -->
+    <textarea id="things-to-do" placeholder="Things to do..."></textarea>
+    <!-- Embed bio.link -->
+    <iframe 
+        class="bio-link" 
+        src="" // bio link link
+        title="Bio Link">
+    </iframe>
+    <!-- Custom countdowns -->
+    <div id="event-countdowns">
+        <h3>Upcoming Events</h3>
+        <ul>
+            <li id="christmas-countdown"></li>
+            <li id="birthday-countdown"></li>
+            <li id="schoolend-countdown"></li>
+        </ul>
+    </div>
+    <script>
+        // Live date/time
+        function startClock() {
+            const clockElement = document.getElementById('countdown');
+            function updateClock() {
+                const now = new Date();
+                const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const formattedDate = now.toLocaleDateString('en-US', dateOptions);
+                const timeOptions = { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true };
+                const formattedTime = now.toLocaleTimeString('en-US', timeOptions);
+                clockElement.innerHTML = `${formattedDate}<br>${formattedTime}`;
+            }
+            setInterval(updateClock, 1000);
+            updateClock();
+        }
+        startClock();
+
+        // "Things to do" localStorage
+        const thingsToDoBox = document.getElementById('things-to-do');
+        thingsToDoBox.value = localStorage.getItem('thingsToDo') || '';
+        thingsToDoBox.addEventListener('input', () => {
+            localStorage.setItem('thingsToDo', thingsToDoBox.value);
+        });
+
+        // Custom countdowns
+        function updateEventCountdowns() {
+            const now = new Date();
+
+            // Christmas (December 25, next if already passed this year)
+            const christmasYear = (now.getMonth() > 11 || (now.getMonth() === 11 && now.getDate() > 25)) ? now.getFullYear() + 1 : now.getFullYear();
+            const christmas = new Date(christmasYear, 11, 25, 0, 0, 0); // December is month 11
+
+            // Birthday changed to January 14 (month 0)
+            const birthdayMonth = 0; // January
+            const birthdayDay = 14;
+            const birthdayYear = (now.getMonth() > birthdayMonth || (now.getMonth() === birthdayMonth && now.getDate() > birthdayDay)) ? now.getFullYear() + 1 : now.getFullYear();
+            const birthday = new Date(birthdayYear, birthdayMonth, birthdayDay, 0, 0, 0);
+
+            // End of School (May 21, next if already passed)
+            const schoolEndMonth = 4; // May
+            const schoolEndDay = 21;
+            const schoolEndYear = (now.getMonth() > schoolEndMonth || (now.getMonth() === schoolEndMonth && now.getDate() > schoolEndDay)) ? now.getFullYear() + 1 : now.getFullYear();
+            const schoolEnd = new Date(schoolEndYear, schoolEndMonth, schoolEndDay, 0, 0, 0);
+
+            // Helper to get difference
+            function getCountdownText(targetDate) {
+                let diff = targetDate - now;
+                if (diff < 0) return "Passed!";
+                let days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                let hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                let mins = Math.floor((diff / (1000 * 60)) % 60);
+                let secs = Math.floor((diff / 1000) % 60);
+                return `${days} days, ${hours} hours, ${mins} mins, ${secs} secs`;
+            }
+
+            document.getElementById('christmas-countdown').innerHTML = `<strong>🎄 Christmas:</strong> ${getCountdownText(christmas)}`;
+            document.getElementById('birthday-countdown').innerHTML = `<strong>🎂 My Birthday:</strong> ${getCountdownText(birthday)}`;
+            document.getElementById('schoolend-countdown').innerHTML = `<strong>🏫 End of School:</strong> ${getCountdownText(schoolEnd)}`;
+        }
+
+        // Update countdowns every second
+        setInterval(updateEventCountdowns, 1000);
+        updateEventCountdowns();
+    </script>
+</body>
+</html>
